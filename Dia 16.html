@@ -94,7 +94,7 @@
     </style>
 </head>
 <body>
-    <h1 class="message">🎄 Dia 16: Navidad de las ratas ❤️</h1>
+    <h1 class="message">🎄 Día 16: Navidad de las ratas ❤️</h1>
     <h2 class="message">Ayuda a la ratita a recolectar corazones para su novia 🐭❤️🐭</h2>
     <button id="startGame">Iniciar Juego</button>
     <button id="resetGame" style="display:none;">Reiniciar Juego</button>
@@ -114,7 +114,7 @@
         const upButton = document.getElementById('up');
         const downButton = document.getElementById('down');
 
-        let rat = { x: 50, y: 200, width: 50, height: 50, speed: 20 }; // Velocidad alta del ratón
+        let rat = { x: 50, y: 200, width: 50, height: 50, speed: 20 }; // Velocidad constante rápida
         let hearts = [];
         let powers = [];
         let score = 0;
@@ -151,7 +151,12 @@
 
         function generateHeart() {
             const yPosition = Math.random() * (canvas.height - 30); // Corazones dentro del área jugable
-            hearts.push({ x: canvas.width, y: yPosition });
+
+            // Verificar que el nuevo corazón no se superponga con otros
+            const isOverlapping = hearts.some(heart => Math.abs(heart.y - yPosition) < 40);
+            if (!isOverlapping) {
+                hearts.push({ x: canvas.width, y: yPosition });
+            }
         }
 
         function generatePower() {
@@ -204,7 +209,7 @@
             drawItems(hearts, heartImage);
             drawItems(powers, powerImage);
 
-            let heartSpeed = 2 + (score / 10);
+            let heartSpeed = 2;
             hearts = updateItems(hearts, heartSpeed);
             powers = updateItems(powers, 3);
 
