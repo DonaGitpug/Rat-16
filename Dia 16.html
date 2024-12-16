@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Navidad y Amor</title>
     <style>
         body {
@@ -12,7 +12,7 @@
             background: linear-gradient(to bottom, #ffefba, #ffffff);
             overflow: hidden;
             height: 100vh;
-            touch-action: manipulation; /* Deshabilitar zoom por doble clic */
+            touch-action: manipulation; /* Deshabilitar gestos de zoom */
         }
 
         canvas {
@@ -114,7 +114,7 @@
         const upButton = document.getElementById('up');
         const downButton = document.getElementById('down');
 
-        let rat = { x: 50, y: 200, width: 50, height: 50, speed: 7 };
+        let rat = { x: 50, y: 200, width: 50, height: 50, speed: 15 }; // Velocidad del ratón rápida
         let hearts = [];
         let powers = [];
         let score = 0;
@@ -213,11 +213,8 @@
                 endGame();
             }
 
-            // Incrementar la velocidad del ratón con el puntaje
-            rat.speed = 7 + Math.floor(score / 15);
-
             // Verificar si se alcanza el puntaje de victoria
-            if (score >= 135) {
+            if (score >= 75) {
                 winGame();
             }
 
@@ -264,6 +261,9 @@
 
         startButton.addEventListener('click', startGame);
         resetButton.addEventListener('click', resetGame);
+
+        // Deshabilitar gestos de zoom
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
     </script>
 </body>
 </html>
