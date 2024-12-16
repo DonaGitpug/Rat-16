@@ -13,6 +13,9 @@
             overflow: hidden;
             height: 100vh;
             touch-action: manipulation; /* Deshabilitar gestos de zoom */
+            -webkit-user-select: none; /* Deshabilitar selección en Safari */
+            -ms-user-select: none; /* Deshabilitar selección en IE/Edge */
+            user-select: none; /* Deshabilitar selección en navegadores modernos */
         }
 
         canvas {
@@ -29,6 +32,9 @@
             color: #ff0000;
             font-size: 24px;
             animation: fadeIn 2s infinite alternate;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         @keyframes fadeIn {
@@ -46,6 +52,9 @@
             border: none;
             border-radius: 15px;
             cursor: pointer;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         #startGame:hover, #resetGame:hover {
@@ -71,6 +80,9 @@
             border: none;
             border-radius: 50%;
             cursor: pointer;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         .control-btn:active {
@@ -116,12 +128,10 @@
 
         let rat = { x: 50, y: 200, width: 50, height: 50, speed: 20 }; // Velocidad constante rápida
         let hearts = [];
-        let powers = [];
         let score = 0;
         let highScore = 0;
         let gameInterval;
         let isGameOver = false;
-        let multiplier = 1;
 
         const ratImage = new Image();
         ratImage.src = 'https://imgur.com/JKPSGw5.png'; // Imagen de la ratita
@@ -129,73 +139,52 @@
         const heartImage = new Image();
         heartImage.src = 'https://imgur.com/e9Qi2mk.png'; // Imagen del corazón
 
-        const powerImage = new Image();
-        powerImage.src = 'https://imgur.com/1dL4RnG.png'; // Imagen del poder
-
         function drawRat() {
             ctx.drawImage(ratImage, rat.x, rat.y, rat.width, rat.height);
         }
 
-        function drawItems(items, image) {
-            items.forEach(item => {
-                ctx.drawImage(image, item.x, item.y, 30, 30);
+        function drawHearts() {
+            hearts.forEach(heart => {
+                ctx.drawImage(heartImage, heart.x, heart.y, 30, 30);
             });
         }
 
-        function updateItems(items, speed) {
-            items.forEach(item => {
-                item.x -= speed;
+        function updateHearts() {
+            hearts.forEach(heart => {
+                heart.x -= 2; // Velocidad de los corazones
             });
-            return items.filter(item => item.x > -30);
+            hearts = hearts.filter(heart => heart.x > -30); // Eliminar corazones fuera de pantalla
         }
 
         function generateHeart() {
-            const yPosition = Math.random() * (canvas.height - 30); // Corazones dentro del área jugable
-
-            // Verificar que el nuevo corazón no se superponga con otros
-            const isOverlapping = hearts.some(heart => Math.abs(heart.y - yPosition) < 40);
-            if (!isOverlapping) {
+            let yPosition = Math.random() * (canvas.height - 40);
+            // Asegurar que los corazones tengan un espaciado mínimo
+            const isTooClose = hearts.some(heart => Math.abs(heart.y - yPosition) < 50);
+            if (!isTooClose) {
                 hearts.push({ x: canvas.width, y: yPosition });
             }
         }
 
-        function generatePower() {
-            const yPosition = Math.random() * (canvas.height - 30); // Poderes dentro del área jugable
-            if (Math.random() < 0.5) {
-                powers.push({ x: canvas.width, y: yPosition });
-            }
-        }
-
-        function checkCollision(items, callback) {
-            items.forEach((item, index) => {
+        function checkCollision() {
+            hearts.forEach((heart, index) => {
                 if (
-                    rat.x < item.x + 30 &&
-                    rat.x + rat.width > item.x &&
-                    rat.y < item.y + 30 &&
-                    rat.y + rat.height > item.y
+                    rat.x < heart.x + 30 &&
+                    rat.x + rat.width > heart.x &&
+                    rat.y < heart.y + 30 &&
+                    rat.y + rat.height > heart.y
                 ) {
-                    items.splice(index, 1);
-                    callback();
+                    hearts.splice(index, 1);
+                    score++;
                 }
             });
         }
 
-        function winGame() {
+        function endGame(message) {
             clearInterval(gameInterval);
             isGameOver = true;
             ctx.font = '50px Arial';
-            ctx.fillStyle = 'green';
-            ctx.fillText("¡Ganaste!", canvas.width / 2 - 100, canvas.height / 2);
-            resetButton.style.display = 'block';
-            highScore = Math.max(highScore, score);
-        }
-
-        function endGame() {
-            isGameOver = true;
-            clearInterval(gameInterval);
-            ctx.font = '50px Arial';
-            ctx.fillStyle = 'red';
-            ctx.fillText("Game Over", canvas.width / 2 - 120, canvas.height / 2);
+            ctx.fillStyle = message === "¡Ganaste!" ? 'green' : 'red';
+            ctx.fillText(message, canvas.width / 2 - 150, canvas.height / 2);
             resetButton.style.display = 'block';
             highScore = Math.max(highScore, score);
         }
@@ -206,22 +195,12 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             drawRat();
-            drawItems(hearts, heartImage);
-            drawItems(powers, powerImage);
-
-            let heartSpeed = 2;
-            hearts = updateItems(hearts, heartSpeed);
-            powers = updateItems(powers, 3);
-
-            checkCollision(hearts, () => score += 1 * multiplier);
-            checkCollision(powers, () => multiplier = 5);
-
-            if (hearts.some(heart => heart.x < 0)) {
-                endGame();
-            }
+            drawHearts();
+            updateHearts();
+            checkCollision();
 
             if (score >= 75) {
-                winGame();
+                endGame("¡Ganaste!");
             }
 
             ctx.font = '20px Arial';
@@ -236,28 +215,26 @@
             canvas.style.display = 'block';
             controls.style.display = 'flex';
             score = 0;
-            multiplier = 1;
+            hearts = [];
             isGameOver = false;
 
             gameInterval = setInterval(gameLoop, 1000 / 60);
-            setInterval(generateHeart, 3000);
-            setInterval(generatePower, 5000);
+            setInterval(generateHeart, 2000);
 
             window.addEventListener('keydown', handleKeyPress);
-            upButton.addEventListener('touchstart', () => moveRat('up'));
-            downButton.addEventListener('touchstart', () => moveRat('down'));
+            upButton.addEventListener('click', () => moveRat('up'));
+            downButton.addEventListener('click', () => moveRat('down'));
         }
 
         function resetGame() {
             hearts = [];
-            powers = [];
             rat.y = 200;
             startGame();
         }
 
         function handleKeyPress(e) {
-            if (e.key === 'ArrowUp' && rat.y > 0) moveRat('up');
-            if (e.key === 'ArrowDown' && rat.y < canvas.height - rat.height) moveRat('down');
+            if (e.key === 'ArrowUp') moveRat('up');
+            if (e.key === 'ArrowDown') moveRat('down');
         }
 
         function moveRat(direction) {
@@ -268,7 +245,7 @@
         startButton.addEventListener('click', startGame);
         resetButton.addEventListener('click', resetGame);
 
-        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        document.addEventListener('gesturestart', e => e.preventDefault());
     </script>
 </body>
 </html>
