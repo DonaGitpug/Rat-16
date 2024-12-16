@@ -114,7 +114,7 @@
         const upButton = document.getElementById('up');
         const downButton = document.getElementById('down');
 
-        let rat = { x: 50, y: 200, width: 50, height: 50, speed: 15 }; // Velocidad del ratón rápida
+        let rat = { x: 50, y: 200, width: 50, height: 50, speed: 20 }; // Velocidad alta del ratón
         let hearts = [];
         let powers = [];
         let score = 0;
@@ -150,12 +150,14 @@
         }
 
         function generateHeart() {
-            hearts.push({ x: canvas.width, y: Math.random() * canvas.height });
+            const yPosition = Math.random() * (canvas.height - 30); // Corazones dentro del área jugable
+            hearts.push({ x: canvas.width, y: yPosition });
         }
 
         function generatePower() {
+            const yPosition = Math.random() * (canvas.height - 30); // Poderes dentro del área jugable
             if (Math.random() < 0.5) {
-                powers.push({ x: canvas.width, y: Math.random() * canvas.height });
+                powers.push({ x: canvas.width, y: yPosition });
             }
         }
 
@@ -213,7 +215,6 @@
                 endGame();
             }
 
-            // Verificar si se alcanza el puntaje de victoria
             if (score >= 75) {
                 winGame();
             }
@@ -234,7 +235,7 @@
             isGameOver = false;
 
             gameInterval = setInterval(gameLoop, 1000 / 60);
-            setInterval(generateHeart, 4000);
+            setInterval(generateHeart, 3000);
             setInterval(generatePower, 5000);
 
             window.addEventListener('keydown', handleKeyPress);
@@ -262,7 +263,6 @@
         startButton.addEventListener('click', startGame);
         resetButton.addEventListener('click', resetGame);
 
-        // Deshabilitar gestos de zoom
         document.addEventListener('gesturestart', (e) => e.preventDefault());
     </script>
 </body>
