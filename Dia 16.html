@@ -12,6 +12,7 @@
             background: linear-gradient(to bottom, #ffefba, #ffffff);
             overflow: hidden;
             height: 100vh;
+            touch-action: manipulation; /* Deshabilitar zoom por doble clic */
         }
 
         canvas {
@@ -38,12 +39,12 @@
         #startGame, #resetGame {
             display: block;
             margin: 20px auto;
-            padding: 10px 20px;
-            font-size: 20px;
+            padding: 15px 30px;
+            font-size: 22px;
             color: white;
             background-color: #ff0000;
             border: none;
-            border-radius: 10px;
+            border-radius: 15px;
             cursor: pointer;
         }
 
@@ -62,9 +63,9 @@
         }
 
         .control-btn {
-            width: 80px;
-            height: 80px;
-            font-size: 30px;
+            width: 100px;
+            height: 100px;
+            font-size: 36px;
             color: white;
             background-color: #ff0000;
             border: none;
@@ -81,12 +82,13 @@
                 font-size: 18px;
             }
             #startGame, #resetGame {
-                font-size: 18px;
+                font-size: 20px;
+                padding: 10px 25px;
             }
             .control-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
+                width: 80px;
+                height: 80px;
+                font-size: 28px;
             }
         }
     </style>
@@ -152,7 +154,7 @@
         }
 
         function generatePower() {
-            if (Math.random() < 0.5) { // 50% de probabilidad de generar un poder
+            if (Math.random() < 0.5) {
                 powers.push({ x: canvas.width, y: Math.random() * canvas.height });
             }
         }
@@ -169,6 +171,16 @@
                     callback();
                 }
             });
+        }
+
+        function winGame() {
+            clearInterval(gameInterval);
+            isGameOver = true;
+            ctx.font = '50px Arial';
+            ctx.fillStyle = 'green';
+            ctx.fillText("¡Ganaste!", canvas.width / 2 - 100, canvas.height / 2);
+            resetButton.style.display = 'block';
+            highScore = Math.max(highScore, score);
         }
 
         function endGame() {
@@ -190,21 +202,23 @@
             drawItems(hearts, heartImage);
             drawItems(powers, powerImage);
 
-            // Ajuste de velocidad de los corazones según el puntaje
-            let heartSpeed = 2 + (score / 10); // Los corazones van más lentos al principio y se aceleran gradualmente
-
+            let heartSpeed = 2 + (score / 10);
             hearts = updateItems(hearts, heartSpeed);
             powers = updateItems(powers, 3);
-
-            // Aumentar la velocidad del ratón conforme sube el puntaje
-            if (score >= 5) rat.speed = 8;
-            if (score >= 10) rat.speed = 10;
 
             checkCollision(hearts, () => score += 1 * multiplier);
             checkCollision(powers, () => multiplier = 5);
 
             if (hearts.some(heart => heart.x < 0)) {
                 endGame();
+            }
+
+            // Incrementar la velocidad del ratón con el puntaje
+            rat.speed = 7 + Math.floor(score / 15);
+
+            // Verificar si se alcanza el puntaje de victoria
+            if (score >= 135) {
+                winGame();
             }
 
             ctx.font = '20px Arial';
@@ -223,14 +237,12 @@
             isGameOver = false;
 
             gameInterval = setInterval(gameLoop, 1000 / 60);
-            setInterval(generateHeart, 4000); // Los corazones aparecerán con mayor frecuencia
+            setInterval(generateHeart, 4000);
             setInterval(generatePower, 5000);
 
             window.addEventListener('keydown', handleKeyPress);
             upButton.addEventListener('touchstart', () => moveRat('up'));
             downButton.addEventListener('touchstart', () => moveRat('down'));
-            upButton.addEventListener('click', () => moveRat('up'));
-            downButton.addEventListener('click', () => moveRat('down'));
         }
 
         function resetGame() {
@@ -255,4 +267,3 @@
     </script>
 </body>
 </html>
-
