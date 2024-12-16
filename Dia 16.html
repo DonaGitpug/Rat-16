@@ -13,9 +13,9 @@
             overflow: hidden;
             height: 100vh;
             touch-action: manipulation; /* Deshabilitar gestos de zoom */
-            -webkit-user-select: none; /* Deshabilitar selección en Safari */
-            -ms-user-select: none; /* Deshabilitar selección en IE/Edge */
-            user-select: none; /* Deshabilitar selección en navegadores modernos */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         canvas {
@@ -126,11 +126,12 @@
         const upButton = document.getElementById('up');
         const downButton = document.getElementById('down');
 
-        let rat = { x: 50, y: 200, width: 50, height: 50, speed: 20 }; // Velocidad constante rápida
+        let rat = { x: 50, y: 200, width: 50, height: 50, speed: 20 }; // Velocidad constante
         let hearts = [];
         let score = 0;
         let highScore = 0;
         let gameInterval;
+        let heartInterval;
         let isGameOver = false;
 
         const ratImage = new Image();
@@ -151,14 +152,13 @@
 
         function updateHearts() {
             hearts.forEach(heart => {
-                heart.x -= 2; // Velocidad de los corazones
+                heart.x -= 3; // Velocidad de los corazones
             });
             hearts = hearts.filter(heart => heart.x > -30); // Eliminar corazones fuera de pantalla
         }
 
         function generateHeart() {
             let yPosition = Math.random() * (canvas.height - 40);
-            // Asegurar que los corazones tengan un espaciado mínimo
             const isTooClose = hearts.some(heart => Math.abs(heart.y - yPosition) < 50);
             if (!isTooClose) {
                 hearts.push({ x: canvas.width, y: yPosition });
@@ -181,6 +181,7 @@
 
         function endGame(message) {
             clearInterval(gameInterval);
+            clearInterval(heartInterval);
             isGameOver = true;
             ctx.font = '50px Arial';
             ctx.fillStyle = message === "¡Ganaste!" ? 'green' : 'red';
@@ -219,7 +220,7 @@
             isGameOver = false;
 
             gameInterval = setInterval(gameLoop, 1000 / 60);
-            setInterval(generateHeart, 2000);
+            heartInterval = setInterval(generateHeart, 2000);
 
             window.addEventListener('keydown', handleKeyPress);
             upButton.addEventListener('click', () => moveRat('up'));
@@ -227,6 +228,8 @@
         }
 
         function resetGame() {
+            clearInterval(gameInterval);
+            clearInterval(heartInterval);
             hearts = [];
             rat.y = 200;
             startGame();
